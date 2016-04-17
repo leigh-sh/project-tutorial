@@ -1,5 +1,5 @@
-var restify = require('restify')
-var redis = require('redis')
+var restify = require('restify');
+var redis = require('redis');
 var client = redis.createClient();
 var server = restify.createServer();
 
