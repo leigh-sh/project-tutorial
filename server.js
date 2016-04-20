@@ -4,23 +4,32 @@ var fs = require('fs');
 var client = redis.createClient();
 var server = restify.createServer();
 
-client.on('error', function (err) {
-    console.log('Error ' + err);
+client.on('error', function(err) {
+    console.log('error ' + err);
 });
 
-server.get('/hello', function(req, res, next){
-    fs.writeFile("/tmp/log", "test", function(err) {
-    if(err) {
-        return console.log(err);
+function getHello(req, res, next){
+    client.get('hello', function(err, reply){ 
+        console.log(reply);
+    });
+}
+
+function insertToRedis(req, response, next) {
+    client.get('hello', function(err, res){ 
+        console.log(res);
+    if (res) {    
+      client.incr('hello');  
+      response.send(200);
     }
-    client.incr('hello');
-   
-    client.get('hello', function(err, reply){ console.log(reply);});
-    res.send({ success: true, session: req.session });
-    return next();
+    else {
+        response.status(404);
+        response.send('error');
+    }
+    
 });
-});
+}
+server.get('/hello', insertToRedis);
 
 server.listen(8000, function() {
-console.log('listening at %s', server.url);
+    console.log('listening at %s', server.url);
 });
